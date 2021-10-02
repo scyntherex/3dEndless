@@ -4,31 +4,34 @@ using UnityEngine;
 
 public class GenerateWorld : MonoBehaviour
 {
-    public GameObject[] platforms;
     GameObject dummyTraveler;
 
     void Start()
     {
         dummyTraveler = new GameObject("dummy");
 
-        for(int i = 0; i < 50; i++)
+        for(int i = 0; i < 20; i++)
         {
-            int platformNumber = Random.Range(0, platforms.Length);
-            GameObject p = Instantiate(platforms[platformNumber], 
-                dummyTraveler.transform.position, 
-                dummyTraveler.transform.rotation);
+            GameObject p = Pool.singleton.GetRandom();
+            if (p == null)
+            {
+                return;
+            }
+            p.SetActive(true);
+            p.transform.position = dummyTraveler.transform.position;
+            p.transform.rotation = dummyTraveler.transform.rotation;
 
-            if (platforms[platformNumber].tag == "stairsUp")
+            if (p.tag == "stairsUp")
             {
                 dummyTraveler.transform.Translate(0, 5, 0);
             }
-            else if (platforms[platformNumber].tag == "stairsDown")
+            else if (p.tag == "stairsDown")
             {
                 dummyTraveler.transform.Translate(0, -5, 0);
                 p.transform.Rotate(new Vector3(0, 180, 0));
                 p.transform.position = dummyTraveler.transform.position;
             }
-            else if (platforms[platformNumber].tag == "platformTSection")
+            else if (p.tag == "platformTSection")
             {
                 if (Random.Range(0, 2) == 0) {
                     dummyTraveler.transform.Rotate(new Vector3(0, 90, 0));
