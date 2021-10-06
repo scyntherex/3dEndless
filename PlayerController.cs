@@ -4,12 +4,25 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    Animator animator;          
+    Animator animator;
+    public static GameObject player;
+    public static GameObject currentPlatform;
+    bool canTurn = false;
+    Vector3 startPosition;
+
+    void OnCollisionEnter(Collision other)
+    {
+        currentPlatform = other.gameObject;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
         animator = this.GetComponent<Animator>();
+        player = this.gameObject;
+        startPosition = player.transform.position;
+
+        GenerateWorld.RunDummy();
     }
 
     void StopJumping()
@@ -21,6 +34,26 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("isCastingMagic", false);
     }
 
+    void OnTriggerEnter(Collider other)
+    {
+        if (other is BoxCollider && GenerateWorld.lastPlatform.tag != "platformTSection")
+        {
+            GenerateWorld.RunDummy();
+        }
+
+        if (other is SphereCollider)
+        {
+            canTurn = true;
+        }
+    }
+
+    void OnTriggerExit(Collider other)
+    {
+        if (other is SphereCollider)
+        {
+            canTurn = false;
+        }
+    }
 
     // Update is called once per frame
     void Update()
@@ -33,21 +66,41 @@ public class PlayerController : MonoBehaviour
         {
             animator.SetBool("isCastingMagic", true);
         }
-        else if (Input.GetKeyDown(KeyCode.RightArrow))
+        else if (Input.GetKeyDown(KeyCode.RightArrow) && canTurn)
         {
             this.transform.Rotate(Vector3.up * 90);
+            GenerateWorld.dummyTraveler.transform.forward = -this.transform.forward;
+            GenerateWorld.RunDummy();
+
+            if (GenerateWorld.lastPlatform.tag != "platformTSection")
+            {
+                GenerateWorld.RunDummy();
+                GenerateWorld.RunDummy();
+            }
+
+            this.transform.position = new Vector3(startPosition.x, this.transform.position.y, startPosition.z);
         }
-        else if (Input.GetKeyDown(KeyCode.LeftArrow))
+        else if (Input.GetKeyDown(KeyCode.LeftArrow) && canTurn)
         {
             this.transform.Rotate(Vector3.up * -90);
+            GenerateWorld.dummyTraveler.transform.forward = -this.transform.forward;
+            GenerateWorld.RunDummy();
+
+            if (GenerateWorld.lastPlatform.tag != "platformTSection")
+            {
+                GenerateWorld.RunDummy();
+                GenerateWorld.RunDummy();
+            }
+
+            this.transform.position = new Vector3(startPosition.x, this.transform.position.y, startPosition.z);
         }
         else if (Input.GetKeyDown(KeyCode.A))
         {
-            this.transform.Translate(-0.1f, 0, 0);
+            this.transform.Translate(-0.5f, 0, 0);
         }
         else if (Input.GetKeyDown(KeyCode.D))
         {
-            this.transform.Translate(0.1f, 0, 0);
+            this.transform.Translate(0.5f, 0, 0);
         }
     }
 }
