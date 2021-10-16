@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -18,12 +20,48 @@ public class PlayerController : MonoBehaviour
     public Transform burgerStartPos;
     Rigidbody burgerRB;
 
+    int livesLeft;
+    public Texture aliveIcon;
+    public Texture deadIcon;
+    public RawImage[] icons;
+
+    public GameObject gameOverPanel;
+    public Text highScore;
+
+    void RestartGame()
+    {
+        SceneManager.LoadScene("ScrollingWorld", LoadSceneMode.Single);
+    }
+
     void OnCollisionEnter(Collision other)
     {
-        if (other.gameObject.tag == "Fire" || other.gameObject.tag == "Wall")
+        if ((other.gameObject.tag == "Fire" || other.gameObject.tag == "Wall") && !isDead)
         {
             animator.SetTrigger("isDead");
             isDead = true;
+            livesLeft--;
+            PlayerPrefs.SetInt("lives", livesLeft);
+
+            if (livesLeft > 0)
+            {
+                Invoke("RestartGame", 1);
+            }
+            else
+            {
+                icons[0].texture = deadIcon;
+                gameOverPanel.SetActive(true);
+
+                PlayerPrefs.SetInt("lastscore", PlayerPrefs.GetInt("score"));
+                if (PlayerPrefs.HasKey("highscore"))
+                {
+                    int hs = PlayerPrefs.GetInt("highscore");
+                    PlayerPrefs.SetInt("highscore", Mathf.Max(hs, PlayerPrefs.GetInt("score")));
+                }
+                else
+                {
+                    PlayerPrefs.SetInt("highscore", PlayerPrefs.GetInt("score"));
+                }
+            }
         }
         else
         {
@@ -42,6 +80,26 @@ public class PlayerController : MonoBehaviour
         startPosition = player.transform.position;
 
         GenerateWorld.RunDummy();
+
+        if (PlayerPrefs.HasKey("highscore"))
+        {
+            highScore.text = "High Score: " + PlayerPrefs.GetInt("highscore");
+        }
+        else
+        {
+            highScore.text = "High Score: 0";
+        }
+
+        isDead = false;
+        livesLeft = PlayerPrefs.GetInt("lives");
+
+        for(int i = 0; i < icons.Length; i++)
+        {
+            if (i >= livesLeft)
+            {
+                icons[i].texture = deadIcon;
+            }
+        }
     }
 
     void ThrowBurger()
