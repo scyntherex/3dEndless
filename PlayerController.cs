@@ -9,6 +9,7 @@ public class PlayerController : MonoBehaviour
     Animator animator;
     public static GameObject player;
     public static GameObject currentPlatform;
+    public static AudioSource[] sfx;
 
     bool canTurn = false;
     Vector3 startPosition;
@@ -39,6 +40,7 @@ public class PlayerController : MonoBehaviour
         {
             animator.SetTrigger("isDead");
             isDead = true;
+            sfx[2].Play();
             livesLeft--;
             PlayerPrefs.SetInt("lives", livesLeft);
 
@@ -75,6 +77,7 @@ public class PlayerController : MonoBehaviour
         animator = this.GetComponent<Animator>();
         rb = this.GetComponent<Rigidbody>();
         burgerRB = burger.GetComponent<Rigidbody>();
+        sfx = GameObject.FindWithTag("gameData").GetComponentsInChildren<AudioSource>();
 
         player = this.gameObject;
         startPosition = player.transform.position;
@@ -115,6 +118,19 @@ public class PlayerController : MonoBehaviour
         burger.SetActive(false);
     }
 
+    void PlayThrowSound()
+    {
+        sfx[1].Play();
+    }
+    public void FootStep1()
+    {
+        sfx[4].Play();
+    }
+    public void FootStep2()
+    {
+        sfx[5].Play();
+    }
+
     void StopJumping()
     {
         animator.SetBool("isJumping", false);
@@ -153,6 +169,7 @@ public class PlayerController : MonoBehaviour
         {
             animator.SetBool("isJumping", true);
             rb.AddForce(Vector3.up * 200);
+            sfx[6].Play();
         }
         else if (Input.GetKeyDown(KeyCode.M) && animator.GetBool("isJumping") == false)
         {

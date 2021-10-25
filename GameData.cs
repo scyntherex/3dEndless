@@ -7,12 +7,13 @@ public class GameData : MonoBehaviour
 {
     public static GameData singleton;
     public Text scoreText = null;
+    public GameObject musicSlider;
+    public GameObject soundSlider;
     int score = 0;
 
     void Awake()
     {
         GameObject[] gameData = GameObject.FindGameObjectsWithTag("gameData");
-
 
         if (gameData.Length > 1)
         {
@@ -21,6 +22,9 @@ public class GameData : MonoBehaviour
 
         DontDestroyOnLoad(this.gameObject);
         singleton = this;
+
+        musicSlider.GetComponent<UpdateMusic>().Start();
+        soundSlider.GetComponent<UpdateSound>().Start();
 
         PlayerPrefs.SetInt("score", 0);
     }
